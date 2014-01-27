@@ -3,6 +3,7 @@
 //  Anypic
 //
 //  Created by Mattieu Gamache-Asselin on 5/9/12.
+//  Copyright (c) 2013 Parse. All rights reserved.
 //
 
 #import "PAPFindFriendsViewController.h"
@@ -52,19 +53,13 @@ static NSUInteger const kPAPCellPhotoNumLabelTag = 5;
         self.pullToRefreshEnabled = YES;
         
         // Whether the built-in pull-to-refresh is enabled
-        if (NSClassFromString(@"UIRefreshControl")) {
-            self.pullToRefreshEnabled = NO;
-        } else {
-            self.pullToRefreshEnabled = YES;
-        }
-        
+        self.pullToRefreshEnabled = YES;
+
         // The number of objects to show per page
         self.objectsPerPage = 15;
         
         // Used to determine Follow/Unfollow All button status
         self.followStatus = PAPFindFriendsFollowingSome;
-        
-        [self.tableView setSeparatorColor:[UIColor colorWithRed:210.0f/255.0f green:203.0f/255.0f blue:182.0f/255.0f alpha:1.0]];
     }
     return self;
 }
@@ -75,22 +70,13 @@ static NSUInteger const kPAPCellPhotoNumLabelTag = 5;
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+
     UIView *texturedBackgroundView = [[UIView alloc] initWithFrame:self.view.bounds];
     [texturedBackgroundView setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"BackgroundLeather.png"]]];
     self.tableView.backgroundView = texturedBackgroundView;
         
     self.navigationItem.titleView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"TitleFindFriends.png"]];
-    
-    UIButton *backButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    [backButton setFrame:CGRectMake(0, 0, 52.0f, 32.0f)];
-    [backButton setTitle:@"Back" forState:UIControlStateNormal];
-    [backButton setTitleColor:[UIColor colorWithRed:214.0f/255.0f green:210.0f/255.0f blue:197.0f/255.0f alpha:1.0] forState:UIControlStateNormal];
-    [[backButton titleLabel] setFont:[UIFont boldSystemFontOfSize:[UIFont smallSystemFontSize]]];
-    [backButton setTitleEdgeInsets:UIEdgeInsetsMake(0, 5.0f, 0, 0)];
-    [backButton addTarget:self action:@selector(backButtonAction:) forControlEvents:UIControlEventTouchUpInside];
-    [backButton setBackgroundImage:[UIImage imageNamed:@"ButtonBack.png"] forState:UIControlStateNormal];
-    [backButton setBackgroundImage:[UIImage imageNamed:@"ButtonBackSelected.png"] forState:UIControlStateHighlighted];
-    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:backButton];
     
     if ([MFMailComposeViewController canSendMail] || [MFMessageComposeViewController canSendText]) {
         self.headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 67)];
@@ -100,8 +86,13 @@ static NSUInteger const kPAPCellPhotoNumLabelTag = 5;
         [clearButton addTarget:self action:@selector(inviteFriendsButtonAction:) forControlEvents:UIControlEventTouchUpInside];
         [clearButton setFrame:self.headerView.frame];
         [self.headerView addSubview:clearButton];
-        NSString *inviteString = @"Invite friends";
-        CGSize inviteStringSize = [inviteString sizeWithFont:[UIFont boldSystemFontOfSize:18] constrainedToSize:CGSizeMake(310, CGFLOAT_MAX) lineBreakMode:UILineBreakModeTailTruncation];
+        NSString *inviteString = NSLocalizedString(@"Invite friends", @"Invite friends");
+        CGRect boundingRect = [inviteString boundingRectWithSize:CGSizeMake(310.0f, CGFLOAT_MAX)
+                                                         options:NSStringDrawingTruncatesLastVisibleLine|NSStringDrawingUsesLineFragmentOrigin
+                                                      attributes:@{NSFontAttributeName:[UIFont boldSystemFontOfSize:18.0f]}
+                                                         context:nil];
+        CGSize inviteStringSize = boundingRect.size;
+        
         UILabel *inviteLabel = [[UILabel alloc] initWithFrame:CGRectMake(10, (self.headerView.frame.size.height-inviteStringSize.height)/2, inviteStringSize.width, inviteStringSize.height)];
         [inviteLabel setText:inviteString];
         [inviteLabel setFont:[UIFont boldSystemFontOfSize:18]];
@@ -112,15 +103,6 @@ static NSUInteger const kPAPCellPhotoNumLabelTag = 5;
         [separatorImage setFrame:CGRectMake(0, self.headerView.frame.size.height-2, 320, 2)];
         [self.headerView addSubview:separatorImage];
         [self.tableView setTableHeaderView:self.headerView];
-    }
-    
-    if (NSClassFromString(@"UIRefreshControl")) {
-        // Use the new iOS 6 refresh control.
-        UIRefreshControl *refreshControl = [[UIRefreshControl alloc] init];
-        self.refreshControl = refreshControl;
-        self.refreshControl.tintColor = [UIColor colorWithRed:73.0f/255.0f green:55.0f/255.0f blue:35.0f/255.0f alpha:1.0f];
-        [self.refreshControl addTarget:self action:@selector(refreshControlValueChanged:) forControlEvents:UIControlEventValueChanged];
-        self.pullToRefreshEnabled = NO;
     }
 }
 
@@ -146,11 +128,11 @@ static NSUInteger const kPAPCellPhotoNumLabelTag = 5;
     PFQuery *friendsQuery = [PFUser query];
     [friendsQuery whereKey:kPAPUserFacebookIDKey containedIn:facebookFriends];
     
-    // Query for all auto-follow accounts
-    NSMutableArray *autoFollowAccountFacebookIds = [[NSMutableArray alloc] initWithArray:kPAPAutoFollowAccountFacebookIds];
-    [autoFollowAccountFacebookIds removeObject:[[PFUser currentUser] objectForKey:kPAPUserFacebookIDKey]];
+    // Query for all Parse employees
+    NSMutableArray *parseEmployees = [[NSMutableArray alloc] initWithArray:kPAPParseEmployeeAccounts];
+    [parseEmployees removeObject:[[PFUser currentUser] objectForKey:kPAPUserFacebookIDKey]];
     PFQuery *parseEmployeeQuery = [PFUser query];
-    [parseEmployeeQuery whereKey:kPAPUserFacebookIDKey containedIn:autoFollowAccountFacebookIds];
+    [parseEmployeeQuery whereKey:kPAPUserFacebookIDKey containedIn:parseEmployees];
         
     PFQuery *query = [PFQuery orQueryWithSubqueries:[NSArray arrayWithObjects:friendsQuery, parseEmployeeQuery, nil]];
     query.cachePolicy = kPFCachePolicyNetworkOnly;
@@ -167,10 +149,6 @@ static NSUInteger const kPAPCellPhotoNumLabelTag = 5;
 - (void)objectsDidLoad:(NSError *)error {
     [super objectsDidLoad:error];
     
-    if (NSClassFromString(@"UIRefreshControl")) {
-        [self.refreshControl endRefreshing];
-    }
-
     PFQuery *isFollowingQuery = [PFQuery queryWithClassName:kPAPActivityClassKey];
     [isFollowingQuery whereKey:kPAPActivityFromUserKey equalTo:[PFUser currentUser]];
     [isFollowingQuery whereKey:kPAPActivityTypeKey equalTo:kPAPActivityTypeFollow];
@@ -224,14 +202,8 @@ static NSUInteger const kPAPCellPhotoNumLabelTag = 5;
     
     if (attributes) {
         // set them now
-        NSString *pluralizedPhoto;
         NSNumber *number = [[PAPCache sharedCache] photoCountForUser:(PFUser *)object];
-        if ([number intValue] == 1) {
-            pluralizedPhoto = @"photo";
-        } else {
-            pluralizedPhoto = @"photos";
-        }
-        [cell.photoLabel setText:[NSString stringWithFormat:@"%@ %@", number, pluralizedPhoto]];
+        [cell.photoLabel setText:[NSString stringWithFormat:@"%@ photo%@", number, [number intValue] == 1 ? @"": @"s"]];
     } else {
         @synchronized(self) {
             NSNumber *outstandingCountQueryStatus = [self.outstandingCountQueries objectForKey:indexPath];
@@ -246,14 +218,7 @@ static NSUInteger const kPAPCellPhotoNumLabelTag = 5;
                         [self.outstandingCountQueries removeObjectForKey:indexPath];
                     }
                     PAPFindFriendsCell *actualCell = (PAPFindFriendsCell*)[tableView cellForRowAtIndexPath:indexPath];
-                    NSString *pluralizedPhoto;
-                    if (number == 1) {
-                        pluralizedPhoto = @"photo";
-                    } else {
-                        pluralizedPhoto = @"photos";
-                    }
-                    [actualCell.photoLabel setText:[NSString stringWithFormat:@"%d %@", number, pluralizedPhoto]];
-                    
+                    [actualCell.photoLabel setText:[NSString stringWithFormat:@"%d photo%@", number, number == 1 ? @"" : @"s"]];
                 }];
             };
         }
@@ -331,7 +296,7 @@ static NSUInteger const kPAPCellPhotoNumLabelTag = 5;
 
 /* Called when the user cancels the address book view controller. We simply dismiss it. */
 - (void)peoplePickerNavigationControllerDidCancel:(ABPeoplePickerNavigationController *)peoplePicker {
-    [self dismissModalViewControllerAnimated:YES];
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 /* Called when a member of the address book is selected, we return YES to display the member's details. */
@@ -377,7 +342,7 @@ static NSUInteger const kPAPCellPhotoNumLabelTag = 5;
 
 /* Simply dismiss the MFMailComposeViewController when the user sends an email or cancels */
 - (void)mailComposeController:(MFMailComposeViewController *)controller didFinishWithResult:(MFMailComposeResult)result error:(NSError *)error {
-    [self dismissModalViewControllerAnimated:YES];  
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 
@@ -385,7 +350,7 @@ static NSUInteger const kPAPCellPhotoNumLabelTag = 5;
 
 /* Simply dismiss the MFMessageComposeViewController when the user sends a text or cancels */
 - (void)messageComposeViewController:(MFMessageComposeViewController *)controller didFinishWithResult:(MessageComposeResult)result {
-    [self dismissModalViewControllerAnimated:YES];
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 
@@ -421,7 +386,7 @@ static NSUInteger const kPAPCellPhotoNumLabelTag = 5;
         addressBook.displayedProperties = [NSArray arrayWithObject:[NSNumber numberWithInt:kABPersonPhoneProperty]];
     }
 
-    [self presentModalViewController:addressBook animated:YES];
+    [self presentViewController:addressBook animated:YES completion:nil];
 }
 
 - (void)followAllFriendsButtonAction:(id)sender {
@@ -525,8 +490,8 @@ static NSUInteger const kPAPCellPhotoNumLabelTag = 5;
     // Dismiss the current modal view controller and display the compose email one.
     // Note that we do not animate them. Doing so would require us to present the compose
     // mail one only *after* the address book is dismissed.
-    [self dismissModalViewControllerAnimated:NO];
-    [self presentModalViewController:composeEmailViewController animated:NO];
+    [self dismissViewControllerAnimated:NO completion:nil];
+    [self presentViewController:composeEmailViewController animated:NO completion:nil];
 }
 
 - (void)presentMessageComposeViewController:(NSString *)recipient {
@@ -540,17 +505,13 @@ static NSUInteger const kPAPCellPhotoNumLabelTag = 5;
     
     // Dismiss the current modal view controller and display the compose text one.
     // See previous use for reason why these are not animated.
-    [self dismissModalViewControllerAnimated:NO];
-    [self presentModalViewController:composeTextViewController animated:NO];
+    [self dismissViewControllerAnimated:NO completion:nil];
+    [self presentViewController:composeTextViewController animated:NO completion:nil];
 }
 
 - (void)followUsersTimerFired:(NSTimer *)timer {
     [self.tableView reloadData];
     [[NSNotificationCenter defaultCenter] postNotificationName:PAPUtilityUserFollowingChangedNotification object:nil];
-}
-
-- (void)refreshControlValueChanged:(UIRefreshControl *)refreshControl {
-    [self loadObjects];
 }
 
 @end

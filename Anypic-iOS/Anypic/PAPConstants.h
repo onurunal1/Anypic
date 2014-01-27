@@ -3,6 +3,7 @@
 //  Anypic
 //
 //  Created by Mattieu Gamache-Asselin on 5/25/12.
+//  Copyright (c) 2013 Parse. All rights reserved.
 //
 
 typedef enum {
@@ -12,8 +13,21 @@ typedef enum {
 } PAPTabBarControllerViewControllerIndex;
 
 
-// Define an array of Facebook Ids for accounts to auto-follow on signup
-#define kPAPAutoFollowAccountFacebookIds @[ ]
+// Ilya     400680
+// James    403902
+// Brian    702499
+// David    1225726
+// Bryan    4806789
+// Thomas   6409809
+// Ashley   12800553
+// Héctor   121800083
+// Kevin    500011038
+// Chris    558159381
+// Henele   721873341
+// Matt     723748661
+// Andrew   865225242
+
+#define kPAPParseEmployeeAccounts [NSArray arrayWithObjects:@"400680", @"403902", @"702499", @"1225726", @"4806789", @"6409809", @"12800553", @"121800083", @"500011038", @"558159381", @"721873341", @"723748661", @"865225242", nil]
 
 #pragma mark - NSUserDefaults
 extern NSString *const kPAPUserDefaultsActivityFeedViewControllerLastRefreshKey;

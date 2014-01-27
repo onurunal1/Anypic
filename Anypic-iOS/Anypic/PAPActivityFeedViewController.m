@@ -3,6 +3,7 @@
 //  Anypic
 //
 //  Created by Mattieu Gamache-Asselin on 5/9/12.
+//  Copyright (c) 2013 Parse. All rights reserved.
 //
 
 #import "PAPActivityFeedViewController.h"
@@ -45,11 +46,7 @@
         self.paginationEnabled = YES;
         
         // Whether the built-in pull-to-refresh is enabled
-        if (NSClassFromString(@"UIRefreshControl")) {
-            self.pullToRefreshEnabled = NO;
-        } else {
-            self.pullToRefreshEnabled = YES;
-        }
+        self.pullToRefreshEnabled = YES;
 
         // The number of objects to show per page
         self.objectsPerPage = 15;          
@@ -85,15 +82,10 @@
     [self.blankTimelineView addSubview:button];
 
     lastRefresh = [[NSUserDefaults standardUserDefaults] objectForKey:kPAPUserDefaultsActivityFeedViewControllerLastRefreshKey];
+}
 
-    if (NSClassFromString(@"UIRefreshControl")) {
-        // Use the new iOS 6 refresh control.
-        UIRefreshControl *refreshControl = [[UIRefreshControl alloc] init];
-        self.refreshControl = refreshControl;
-        self.refreshControl.tintColor = [UIColor colorWithRed:73.0f/255.0f green:55.0f/255.0f blue:35.0f/255.0f alpha:1.0f];
-        [self.refreshControl addTarget:self action:@selector(refreshControlValueChanged:) forControlEvents:UIControlEventValueChanged];
-        self.pullToRefreshEnabled = NO;
-    }
+- (UIStatusBarStyle)preferredStatusBarStyle {
+    return UIStatusBarStyleLightContent;
 }
 
 
@@ -168,10 +160,6 @@
 - (void)objectsDidLoad:(NSError *)error {
     [super objectsDidLoad:error];
 
-    if (NSClassFromString(@"UIRefreshControl")) {
-        [self.refreshControl endRefreshing];
-    }
-
     lastRefresh = [NSDate date];
     [[NSUserDefaults standardUserDefaults] setObject:lastRefresh forKey:kPAPUserDefaultsActivityFeedViewControllerLastRefreshKey];
     [[NSUserDefaults standardUserDefaults] synchronize];
@@ -202,7 +190,7 @@
         }
         
         if (unreadCount > 0) {
-            self.navigationController.tabBarItem.badgeValue = [NSString stringWithFormat:@"%d",unreadCount];
+            self.navigationController.tabBarItem.badgeValue = [NSString stringWithFormat:@"%lu",(unsigned long)unreadCount];
         } else {
             self.navigationController.tabBarItem.badgeValue = nil;
         }
@@ -297,10 +285,6 @@
 }
 
 - (void)applicationDidReceiveRemoteNotification:(NSNotification *)note {
-    [self loadObjects];
-}
-
-- (void)refreshControlValueChanged:(UIRefreshControl *)refreshControl {
     [self loadObjects];
 }
 

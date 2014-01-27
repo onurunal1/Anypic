@@ -3,6 +3,7 @@
 //  Anypic
 //
 //  Created by Mattieu Gamache-Asselin on 5/15/12.
+//  Copyright (c) 2013 Parse. All rights reserved.
 //
 
 #import "PAPPhotoDetailsViewController.h"
@@ -47,11 +48,7 @@ static const CGFloat kPAPCellInsetWidth = 20.0f;
         self.parseClassName = kPAPActivityClassKey;
 
         // Whether the built-in pull-to-refresh is enabled
-        if (NSClassFromString(@"UIRefreshControl")) {
-            self.pullToRefreshEnabled = NO;
-        } else {
-            self.pullToRefreshEnabled = YES;
-        }
+        self.pullToRefreshEnabled = YES;
 
         // Whether the built-in pagination is enabled
         self.paginationEnabled = YES;
@@ -75,18 +72,6 @@ static const CGFloat kPAPCellInsetWidth = 20.0f;
     [super viewDidLoad];
     
     self.navigationItem.titleView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"LogoNavigationBar.png"]];
-    self.navigationItem.hidesBackButton = YES;
-
-    UIButton *backButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    backButton.frame = CGRectMake( 0.0f, 0.0f, 52.0f, 32.0f);
-    backButton.titleLabel.font = [UIFont boldSystemFontOfSize:[UIFont smallSystemFontSize]];
-    backButton.titleEdgeInsets = UIEdgeInsetsMake( 0.0f, 5.0f, 0.0f, 0.0f);
-    [backButton setTitle:@"Back" forState:UIControlStateNormal];
-    [backButton setTitleColor:[UIColor colorWithRed:214.0f/255.0f green:210.0f/255.0f blue:197.0f/255.0f alpha:1.0] forState:UIControlStateNormal];
-    [backButton addTarget:self action:@selector(backButtonAction:) forControlEvents:UIControlEventTouchUpInside];
-    [backButton setBackgroundImage:[UIImage imageNamed:@"ButtonBack.png"] forState:UIControlStateNormal];
-    [backButton setBackgroundImage:[UIImage imageNamed:@"ButtonBackSelected.png"] forState:UIControlStateHighlighted];
-    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:backButton];
     
     // Set table view properties
     UIView *texturedBackgroundView = [[UIView alloc] initWithFrame:self.view.bounds];
@@ -111,15 +96,6 @@ static const CGFloat kPAPCellInsetWidth = 20.0f;
     } else if ([self currentUserOwnsPhoto]) {
         // Else we only want to show an action button if the user owns the photo and has permission to delete it.
         self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(actionButtonAction:)];
-    }
-    
-    if (NSClassFromString(@"UIRefreshControl")) {
-        // Use the new iOS 6 refresh control.
-        UIRefreshControl *refreshControl = [[UIRefreshControl alloc] init];
-        self.refreshControl = refreshControl;
-        self.refreshControl.tintColor = [UIColor colorWithRed:73.0f/255.0f green:55.0f/255.0f blue:35.0f/255.0f alpha:1.0f];
-        [self.refreshControl addTarget:self action:@selector(refreshControlValueChanged:) forControlEvents:UIControlEventValueChanged];
-        self.pullToRefreshEnabled = NO;
     }
     
     // Register to be notified when the keyboard will be shown to scroll the view
@@ -189,10 +165,6 @@ static const CGFloat kPAPCellInsetWidth = 20.0f;
 
 - (void)objectsDidLoad:(NSError *)error {
     [super objectsDidLoad:error];
-
-    if (NSClassFromString(@"UIRefreshControl")) {
-        [self.refreshControl endRefreshing];
-    }
 
     [self.headerView reloadLikeBar];
     [self loadLikers];
@@ -437,10 +409,6 @@ static const CGFloat kPAPCellInsetWidth = 20.0f;
         [[PAPCache sharedCache] setAttributesForPhoto:photo likers:likers commenters:commenters likedByCurrentUser:isLikedByCurrentUser];
         [self.headerView reloadLikeBar];
     }];
-}
-
-- (void)refreshControlValueChanged:(UIRefreshControl *)refreshControl {
-    [self loadObjects];
 }
 
 - (BOOL)currentUserOwnsPhoto {

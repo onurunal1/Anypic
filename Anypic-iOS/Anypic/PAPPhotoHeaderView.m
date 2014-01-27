@@ -3,6 +3,7 @@
 //  Anypic
 //
 //  Created by Héctor Ramos on 5/15/12.
+//  Copyright (c) 2013 Parse. All rights reserved.
 //
 
 #import "PAPPhotoHeaderView.h"
@@ -68,7 +69,7 @@
             [self.commentButton setTitleEdgeInsets:UIEdgeInsetsMake( -4.0f, 0.0f, 0.0f, 0.0f)];
             [[self.commentButton titleLabel] setShadowOffset:CGSizeMake( 0.0f, 1.0f)];
             [[self.commentButton titleLabel] setFont:[UIFont systemFontOfSize:12.0f]];
-            [[self.commentButton titleLabel] setMinimumFontSize:11.0f];
+            [[self.commentButton titleLabel] setMinimumScaleFactor:0.8f];
             [[self.commentButton titleLabel] setAdjustsFontSizeToFitWidth:YES];
             [self.commentButton setBackgroundImage:[UIImage imageNamed:@"IconComment.png"] forState:UIControlStateNormal];
             [self.commentButton setSelected:NO];
@@ -88,7 +89,7 @@
             [self.likeButton setTitleEdgeInsets:UIEdgeInsetsMake(0.0f, 0.0f, 0.0f, 0.0f)];
             [[self.likeButton titleLabel] setShadowOffset:CGSizeMake(0.0f, 1.0f)];
             [[self.likeButton titleLabel] setFont:[UIFont systemFontOfSize:12.0f]];
-            [[self.likeButton titleLabel] setMinimumFontSize:11.0f];
+            [[self.likeButton titleLabel] setMinimumScaleFactor:0.8f];
             [[self.likeButton titleLabel] setAdjustsFontSizeToFitWidth:YES];
             [self.likeButton setAdjustsImageWhenHighlighted:NO];
             [self.likeButton setAdjustsImageWhenDisabled:NO];
@@ -105,7 +106,7 @@
             [[self.userButton titleLabel] setFont:[UIFont boldSystemFontOfSize:15]];
             [self.userButton setTitleColor:[UIColor colorWithRed:73.0f/255.0f green:55.0f/255.0f blue:35.0f/255.0f alpha:1.0f] forState:UIControlStateNormal];
             [self.userButton setTitleColor:[UIColor colorWithRed:134.0f/255.0f green:100.0f/255.0f blue:65.0f/255.0f alpha:1.0f] forState:UIControlStateHighlighted];
-            [[self.userButton titleLabel] setLineBreakMode:UILineBreakModeTailTruncation];
+            [[self.userButton titleLabel] setLineBreakMode:NSLineBreakByTruncatingTail];
             [[self.userButton titleLabel] setShadowOffset:CGSizeMake( 0.0f, 1.0f)];
             [self.userButton setTitleShadowColor:[UIColor colorWithWhite:1.0f alpha:0.750f] forState:UIControlStateNormal];
         }
@@ -168,7 +169,12 @@
     CGPoint userButtonPoint = CGPointMake(50.0f, 6.0f);
     constrainWidth -= userButtonPoint.x;
     CGSize constrainSize = CGSizeMake(constrainWidth, containerView.bounds.size.height - userButtonPoint.y*2.0f);
-    CGSize userButtonSize = [self.userButton.titleLabel.text sizeWithFont:self.userButton.titleLabel.font constrainedToSize:constrainSize lineBreakMode:UILineBreakModeTailTruncation];
+
+    CGSize userButtonSize = [self.userButton.titleLabel.text boundingRectWithSize:constrainSize
+                                                    options:NSStringDrawingTruncatesLastVisibleLine|NSStringDrawingUsesLineFragmentOrigin
+                                                 attributes:@{NSFontAttributeName:self.userButton.titleLabel.font}
+                                                    context:nil].size;
+    
     CGRect userButtonFrame = CGRectMake(userButtonPoint.x, userButtonPoint.y, userButtonSize.width, userButtonSize.height);
     [self.userButton setFrame:userButtonFrame];
     

@@ -3,6 +3,7 @@
 //  Anypic
 //
 //  Created by Héctor Ramos on 5/3/12.
+//  Copyright (c) 2013 Parse. All rights reserved.
 //
 
 #import "PAPPhotoCell.h"
@@ -22,6 +23,8 @@
         self.selectionStyle = UITableViewCellSelectionStyleNone;
         self.accessoryType = UITableViewCellAccessoryNone;
         self.clipsToBounds = NO;
+        
+        self.backgroundColor = [UIColor clearColor];
 
         UIView *dropshadowView = [[UIView alloc] init];
         dropshadowView.backgroundColor = [UIColor whiteColor];
