@@ -27,7 +27,7 @@ Anypic requires Xcode 5 and iOS 7. The [tutorial](https://parse.com/tutorials/an
 
 2. Set up a URL scheme for fbFACEBOOK_APP_ID, where FACEBOOK_APP_ID is your Facebook app's id. 
 
-3. Add your Facebook app id to `Info.plist` in the `FacebookAppId` key.
+3. Add your Facebook app id to `Info.plist` in the `FacebookAppID` key.
 
 ## Web Setup 
 

@@ -386,6 +386,7 @@
 }
 
 - (void)photoHeaderView:(PAPPhotoHeaderView *)photoHeaderView didTapLikePhotoButton:(UIButton *)button photo:(PFObject *)photo {
+	// Disable the button so users cannot send duplicate requests
     [photoHeaderView shouldEnableLikeButton:NO];
     
     BOOL liked = !button.selected;

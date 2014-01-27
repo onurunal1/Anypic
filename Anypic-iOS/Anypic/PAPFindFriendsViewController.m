@@ -134,6 +134,7 @@ static NSUInteger const kPAPCellPhotoNumLabelTag = 5;
     PFQuery *parseEmployeeQuery = [PFUser query];
     [parseEmployeeQuery whereKey:kPAPUserFacebookIDKey containedIn:parseEmployees];
         
+    // Combine the two queries with an OR
     PFQuery *query = [PFQuery orQueryWithSubqueries:[NSArray arrayWithObjects:friendsQuery, parseEmployeeQuery, nil]];
     query.cachePolicy = kPFCachePolicyNetworkOnly;
     
