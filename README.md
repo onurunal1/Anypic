@@ -7,7 +7,7 @@ You can get the [source code](https://github.com/ParsePlatform/Anypic) and creat
 
 ## iOS Setup
 
-Anypic requires Xcode 4.5+. It runs on iOS 5.0 and newer. The [tutorial](https://parse.com/tutorials/anypic) provides additional setup instructions.
+Anypic requires Xcode 5 and iOS 7. The [tutorial](https://parse.com/tutorials/anypic) provides additional setup instructions.
 
 #### Setting up your Xcode project
 
@@ -36,7 +36,7 @@ The main Anypic site is at Anypic-web/index.html. The site will show the last ei
 
 #### Parse JavaScript SDK
 
-Anypic is built on top of the [Parse JavaScript SDK](https://parse.com/docs/js_guide). The main JavaScript file is at `Anypic-web/js/anypic.js`.
+Anypic.org is built on top of the [Parse JavaScript SDK](https://parse.com/docs/js_guide). The main JavaScript file is at `Anypic-web/js/anypic.js`.
 
 To get started, copy your app's id and JavaScript key into `anypic.js`:
 
@@ -71,4 +71,4 @@ Anypic uses media queries to present different layouts on iPad, iOS and various 
 
 ## Cloud Code
 
-Add your Parse app id and master key to `Anypic-iOS/CloudCode/config/global.json`, then type `parse deploy` from the command line at `Anypic-iOS/CloudCode`. See the [Cloud Code Guide](https://parse.com/docs/cloud_code_guide#clt) for more information about the `parse` CLI.
+Add your Parse app id and master key to `Anypic-iOS/CloudCode/config/global.json`, then type `parse deploy` from the command line at `Anypic-cloud`. See the [Cloud Code Guide](https://parse.com/docs/cloud_code_guide#clt) for more information about the `parse` CLI.

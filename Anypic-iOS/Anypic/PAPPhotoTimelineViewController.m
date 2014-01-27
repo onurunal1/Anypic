@@ -3,6 +3,7 @@
 //  Anypic
 //
 //  Created by Héctor Ramos on 5/2/12.
+//  Copyright (c) 2013 Parse. All rights reserved.
 //
 
 #import "PAPPhotoTimelineViewController.h"
@@ -47,11 +48,7 @@
         self.paginationEnabled = YES;
 
         // Whether the built-in pull-to-refresh is enabled
-        if (NSClassFromString(@"UIRefreshControl")) {
-            self.pullToRefreshEnabled = NO;
-        } else {
-            self.pullToRefreshEnabled = YES;
-        }
+        self.pullToRefreshEnabled = YES;
 
         // The number of objects to show per page
         self.objectsPerPage = 10;
@@ -68,7 +65,7 @@
 #pragma mark - UIViewController
 
 - (void)viewDidLoad {
-    [self.tableView setSeparatorStyle:UITableViewCellSeparatorStyleNone]; // PFQueryTableViewController reads this in viewDidLoad -- would prefer to throw this in init, but didn't work
+    self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     
     [super viewDidLoad];
     
@@ -76,15 +73,6 @@
     texturedBackgroundView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"BackgroundLeather.png"]];
     self.tableView.backgroundView = texturedBackgroundView;
 
-    if (NSClassFromString(@"UIRefreshControl")) {
-        // Use the new iOS 6 refresh control.
-        UIRefreshControl *refreshControl = [[UIRefreshControl alloc] init];
-        self.refreshControl = refreshControl;
-        self.refreshControl.tintColor = [UIColor colorWithRed:73.0f/255.0f green:55.0f/255.0f blue:35.0f/255.0f alpha:1.0f];
-        [self.refreshControl addTarget:self action:@selector(refreshControlValueChanged:) forControlEvents:UIControlEventValueChanged];
-        self.pullToRefreshEnabled = NO;
-    }
-    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDidPublishPhoto:) name:PAPTabBarControllerDidFinishEditingPhotoNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userFollowingChanged:) name:PAPUtilityUserFollowingChangedNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDidDeletePhoto:) name:PAPPhotoDetailsViewControllerUserDeletedPhotoNotification object:nil];
@@ -100,6 +88,10 @@
         self.shouldReloadOnAppear = NO;
         [self loadObjects];
     }
+}
+
+- (UIStatusBarStyle)preferredStatusBarStyle {
+    return UIStatusBarStyleLightContent;
 }
 
 
@@ -157,12 +149,12 @@
         
         @synchronized(self) {
             // check if we can update the cache
-            NSNumber *outstandingSectionHeaderQueryStatus = [self.outstandingSectionHeaderQueries objectForKey:[NSNumber numberWithInt:section]];
+            NSNumber *outstandingSectionHeaderQueryStatus = [self.outstandingSectionHeaderQueries objectForKey:@(section)];
             if (!outstandingSectionHeaderQueryStatus) {
                 PFQuery *query = [PAPUtility queryForActivitiesOnPhoto:photo cachePolicy:kPFCachePolicyNetworkOnly];
                 [query findObjectsInBackgroundWithBlock:^(NSArray *objects, NSError *error) {
                     @synchronized(self) {
-                        [self.outstandingSectionHeaderQueries removeObjectForKey:[NSNumber numberWithInt:section]];
+                        [self.outstandingSectionHeaderQueries removeObjectForKey:@(section)];
 
                         if (error) {
                             return;
@@ -314,14 +306,6 @@
      */
 
     return query;
-}
-
-- (void)objectsDidLoad:(NSError *)error {
-    [super objectsDidLoad:error];
-    
-    if (NSClassFromString(@"UIRefreshControl")) {
-        [self.refreshControl endRefreshing];
-    }
 }
 
 - (PFObject *)objectAtIndexPath:(NSIndexPath *)indexPath {
@@ -507,10 +491,6 @@
         PAPPhotoDetailsViewController *photoDetailsVC = [[PAPPhotoDetailsViewController alloc] initWithPhoto:photo];
         [self.navigationController pushViewController:photoDetailsVC animated:YES];
     }
-}
-
-- (void)refreshControlValueChanged:(UIRefreshControl *)refreshControl {
-    [self loadObjects];
 }
 
 @end

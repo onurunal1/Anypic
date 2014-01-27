@@ -3,6 +3,7 @@
 //  Anypic
 //
 //  Created by Héctor Ramos on 5/04/12.
+//  Copyright (c) 2013 Parse. All rights reserved.
 //
 
 #import "AppDelegate.h"
@@ -29,33 +30,12 @@
 @property (nonatomic, strong) MBProgressHUD *hud;
 @property (nonatomic, strong) NSTimer *autoFollowTimer;
 
-@property (nonatomic, strong) Reachability *hostReach;
-@property (nonatomic, strong) Reachability *internetReach;
-@property (nonatomic, strong) Reachability *wifiReach;
-
 - (void)setupAppearance;
 - (BOOL)shouldProceedToMainInterface:(PFUser *)user;
 - (BOOL)handleActionURL:(NSURL *)url;
 @end
 
 @implementation AppDelegate
-
-@synthesize window;
-@synthesize navController;
-@synthesize tabBarController;
-@synthesize networkStatus;
-
-@synthesize homeViewController;
-@synthesize activityViewController;
-@synthesize welcomeViewController;
-
-@synthesize hud;
-@synthesize autoFollowTimer;
-
-@synthesize hostReach;
-@synthesize internetReach;
-@synthesize wifiReach;
-
 
 #pragma mark - UIApplicationDelegate
 
@@ -105,21 +85,23 @@
         return YES;
     }
     
-    return [PFFacebookUtils handleOpenURL:url];
+    return [FBAppCall handleOpenURL:url
+                  sourceApplication:sourceApplication
+                        withSession:[PFFacebookUtils session]];
 }
 
-- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)newDeviceToken {
-    [PFPush storeDeviceToken:newDeviceToken];
-
+- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
     if (application.applicationIconBadgeNumber != 0) {
         application.applicationIconBadgeNumber = 0;
     }
 
-    [[PFInstallation currentInstallation] saveInBackground];
+    PFInstallation *currentInstallation = [PFInstallation currentInstallation];
+    [currentInstallation setDeviceTokenFromData:deviceToken];
+    [currentInstallation saveInBackground];
 }
 
 - (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
-	if ([error code] != 3010) { // 3010 is for the iPhone Simulator
+	if (error.code != 3010) { // 3010 is for the iPhone Simulator
         NSLog(@"Application failed to register for push notifications: %@", error);
 	}
 }
@@ -163,7 +145,7 @@
     application.applicationIconBadgeNumber = 1;
     application.applicationIconBadgeNumber = 0;
 
-    [[FBSession activeSession] handleDidBecomeActive];
+    [FBAppCall handleDidBecomeActiveWithSession:[PFFacebookUtils session]];
 }
 
 
@@ -222,7 +204,7 @@
     loginViewController.fields = PFLogInFieldsFacebook;
     loginViewController.facebookPermissions = @[ @"user_about_me" ];
     
-    [self.welcomeViewController presentModalViewController:loginViewController animated:NO];
+    [self.welcomeViewController presentViewController:loginViewController animated:NO completion:nil];
 }
 
 - (void)presentLoginViewController {
@@ -243,15 +225,13 @@
     [PAPUtility addBottomDropShadowToNavigationBarForNavigationController:emptyNavigationController];
     [PAPUtility addBottomDropShadowToNavigationBarForNavigationController:activityFeedNavigationController];
     
-    UITabBarItem *homeTabBarItem = [[UITabBarItem alloc] initWithTitle:@"Home" image:nil tag:0];
-    [homeTabBarItem setFinishedSelectedImage:[UIImage imageNamed:@"IconHomeSelected.png"] withFinishedUnselectedImage:[UIImage imageNamed:@"IconHome.png"]];
-    [homeTabBarItem setTitleTextAttributes: @{ UITextAttributeTextColor: [UIColor colorWithRed:86.0f/255.0f green:55.0f/255.0f blue:42.0f/255.0f alpha:1.0f] } forState:UIControlStateNormal];
-    [homeTabBarItem setTitleTextAttributes: @{ UITextAttributeTextColor: [UIColor colorWithRed:129.0f/255.0f green:99.0f/255.0f blue:69.0f/255.0f alpha:1.0f] } forState:UIControlStateSelected];
+    UITabBarItem *homeTabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Home", @"Home") image:[[UIImage imageNamed:@"IconHome.png"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] selectedImage:[[UIImage imageNamed:@"IconHomeSelected.png"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal]];
+    [homeTabBarItem setTitleTextAttributes: @{ NSForegroundColorAttributeName: [UIColor colorWithRed:86.0f/255.0f green:55.0f/255.0f blue:42.0f/255.0f alpha:1.0f] } forState:UIControlStateNormal];
+    [homeTabBarItem setTitleTextAttributes: @{ NSForegroundColorAttributeName: [UIColor colorWithRed:129.0f/255.0f green:99.0f/255.0f blue:69.0f/255.0f alpha:1.0f] } forState:UIControlStateSelected];
     
-    UITabBarItem *activityFeedTabBarItem = [[UITabBarItem alloc] initWithTitle:@"Activity" image:nil tag:0];
-    [activityFeedTabBarItem setFinishedSelectedImage:[UIImage imageNamed:@"IconTimelineSelected.png"] withFinishedUnselectedImage:[UIImage imageNamed:@"IconTimeline.png"]];
-    [activityFeedTabBarItem setTitleTextAttributes:@{ UITextAttributeTextColor: [UIColor colorWithRed:86.0f/255.0f green:55.0f/255.0f blue:42.0f/255.0f alpha:1.0f] } forState:UIControlStateNormal];
-    [activityFeedTabBarItem setTitleTextAttributes:@{ UITextAttributeTextColor: [UIColor colorWithRed:129.0f/255.0f green:99.0f/255.0f blue:69.0f/255.0f alpha:1.0f] } forState:UIControlStateSelected];
+    UITabBarItem *activityFeedTabBarItem = [[UITabBarItem alloc] initWithTitle:NSLocalizedString(@"Activity", @"Activity") image:[[UIImage imageNamed:@"IconTimeline.png"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] selectedImage:[[UIImage imageNamed:@"IconTimelineSelected.png"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal]];
+    [activityFeedTabBarItem setTitleTextAttributes:@{ NSForegroundColorAttributeName: [UIColor colorWithRed:86.0f/255.0f green:55.0f/255.0f blue:42.0f/255.0f alpha:1.0f] } forState:UIControlStateNormal];
+    [activityFeedTabBarItem setTitleTextAttributes:@{ NSForegroundColorAttributeName: [UIColor colorWithRed:129.0f/255.0f green:99.0f/255.0f blue:69.0f/255.0f alpha:1.0f] } forState:UIControlStateSelected];
     
     [homeNavigationController setTabBarItem:homeTabBarItem];
     [activityFeedNavigationController setTabBarItem:activityFeedTabBarItem];
@@ -302,49 +282,55 @@
 
 #pragma mark - ()
 
+// Set up appearance parameters to achieve Anypic's custom look and feel
 - (void)setupAppearance {
-    [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleBlackOpaque];
+    [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleLightContent;
     
+    NSShadow *shadow = [[NSShadow alloc] init];
+    shadow.shadowColor = [UIColor colorWithWhite:0.0f alpha:0.750f];
+    shadow.shadowOffset = CGSizeMake(0.0f, 1.0f);
+
     [[UINavigationBar appearance] setTintColor:[UIColor colorWithRed:0.498f green:0.388f blue:0.329f alpha:1.0f]];
     [[UINavigationBar appearance] setTitleTextAttributes:@{
-                                UITextAttributeTextColor: [UIColor whiteColor],
-                          UITextAttributeTextShadowColor: [UIColor colorWithWhite:0.0f alpha:0.750f],
-                         UITextAttributeTextShadowOffset: [NSValue valueWithCGSize:CGSizeMake(0.0f, 1.0f)]
-     }];
-    [[UINavigationBar appearance] setBackgroundImage:[UIImage imageNamed:@"BackgroundNavigationBar.png"] forBarMetrics:UIBarMetricsDefault];
-    
-    [[UIButton appearanceWhenContainedIn:[UINavigationBar class], nil] setBackgroundImage:[UIImage imageNamed:@"ButtonNavigationBar.png"] forState:UIControlStateNormal];
-    [[UIButton appearanceWhenContainedIn:[UINavigationBar class], nil] setBackgroundImage:[UIImage imageNamed:@"ButtonNavigationBarSelected.png"] forState:UIControlStateHighlighted];
-    [[UIButton appearanceWhenContainedIn:[UINavigationBar class], nil] setTitleColor:[UIColor colorWithRed:214.0f/255.0f green:210.0f/255.0f blue:197.0f/255.0f alpha:1.0f] forState:UIControlStateNormal];
-    
-    [[UIBarButtonItem appearance] setBackButtonBackgroundImage:[UIImage imageNamed:@"ButtonBack.png"]
-                                                      forState:UIControlStateNormal
-                                                    barMetrics:UIBarMetricsDefault];
-    
-    [[UIBarButtonItem appearance] setBackButtonBackgroundImage:[UIImage imageNamed:@"ButtonBackSelected.png"]
-                                                      forState:UIControlStateSelected
-                                                    barMetrics:UIBarMetricsDefault];
+                                NSForegroundColorAttributeName: [UIColor whiteColor],
+                                NSShadowAttributeName: shadow
+                                }];
 
+    [[UINavigationBar appearance] setBackgroundImage:[UIImage imageNamed:@"BackgroundNavigationBar.png"]
+                                       forBarMetrics:UIBarMetricsDefault];
+    
+    [[UIButton appearanceWhenContainedIn:[UINavigationBar class], nil]
+     setTitleColor:[UIColor colorWithRed:214.0f/255.0f green:210.0f/255.0f blue:197.0f/255.0f alpha:1.0f]
+     forState:UIControlStateNormal];
+    
     [[UIBarButtonItem appearance] setTitleTextAttributes:@{
-                                UITextAttributeTextColor: [UIColor colorWithRed:214.0f/255.0f green:210.0f/255.0f blue:197.0f/255.0f alpha:1.0f],
-                          UITextAttributeTextShadowColor: [UIColor colorWithWhite:0.0f alpha:0.750f],
-                         UITextAttributeTextShadowOffset: [NSValue valueWithCGSize:CGSizeMake(0.0f, 1.0f)]
-     } forState:UIControlStateNormal];
+                                NSForegroundColorAttributeName:
+                                    [UIColor colorWithRed:214.0f/255.0f green:210.0f/255.0f blue:197.0f/255.0f alpha:1.0f],
+                                NSShadowAttributeName: shadow
+                                }
+                                                forState:UIControlStateNormal];
     
     [[UISearchBar appearance] setTintColor:[UIColor colorWithRed:32.0f/255.0f green:19.0f/255.0f blue:16.0f/255.0f alpha:1.0f]];
 }
 
 - (void)monitorReachability {
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reachabilityChanged:) name:ReachabilityChangedNotification object:nil];
+    Reachability *hostReach = [Reachability reachabilityWithHostname:@"api.parse.com"];
+
+    hostReach.reachableBlock = ^(Reachability*reach) {
+        _networkStatus = [reach currentReachabilityStatus];
+        
+        if ([self isParseReachable] && [PFUser currentUser] && self.homeViewController.objects.count == 0) {
+            // Refresh home timeline on network restoration. Takes care of a freshly installed app that failed to load the main timeline under bad network conditions.
+            // In this case, they'd see the empty timeline placeholder and have no way of refreshing the timeline unless they followed someone.
+            [self.homeViewController loadObjects];
+        }
+    };
     
-    self.hostReach = [Reachability reachabilityWithHostName:@"api.parse.com"];
-    [self.hostReach startNotifier];
+    hostReach.unreachableBlock = ^(Reachability*reach) {
+        _networkStatus = [reach currentReachabilityStatus];
+    };
     
-    self.internetReach = [Reachability reachabilityForInternetConnection];
-    [self.internetReach startNotifier];
-    
-    self.wifiReach = [Reachability reachabilityForLocalWiFi];
-    [self.wifiReach startNotifier];
+    [hostReach startNotifier];
 }
 
 - (void)handlePush:(NSDictionary *)launchOptions {
@@ -395,7 +381,7 @@
         [MBProgressHUD hideHUDForView:self.navController.presentedViewController.view animated:YES];
         [self presentTabBarController];
 
-        [self.navController dismissModalViewControllerAnimated:YES];
+        [self.navController dismissViewControllerAnimated:YES completion:nil];
         return YES;
     }
     
@@ -418,24 +404,6 @@
     }
 
     return NO;
-}
-
-// Called by Reachability whenever status changes.
-- (void)reachabilityChanged:(NSNotification* )note {
-    Reachability *curReach = (Reachability *)[note object];
-    NSParameterAssert([curReach isKindOfClass: [Reachability class]]);
-
-    networkStatus = [curReach currentReachabilityStatus];
-    
-    if (networkStatus == NotReachable) {
-        NSLog(@"Network not reachable.");
-    }
-    
-    if ([self isParseReachable] && [PFUser currentUser] && self.homeViewController.objects.count == 0) {
-        // Refresh home timeline on network restoration. Takes care of a freshly installed app that failed to load the main timeline under bad network conditions.
-        // In this case, they'd see the empty timeline placeholder and have no way of refreshing the timeline unless they followed someone.
-        [self.homeViewController loadObjects];
-    }
 }
 
 - (void)shouldNavigateToPhoto:(PFObject *)targetPhoto {
@@ -477,6 +445,10 @@
         [[PAPCache sharedCache] setFacebookFriends:facebookIds];
         
         if (user) {
+            if ([user objectForKey:kPAPUserFacebookFriendsKey]) {
+                [user removeObjectForKey:kPAPUserFacebookFriendsKey];
+            }
+            
             if (![user objectForKey:kPAPUserAlreadyAutoFollowedFacebookFriendsKey]) {
                 self.hud.labelText = NSLocalizedString(@"Following Friends", nil);
                 firstLaunch = YES;
@@ -489,11 +461,11 @@
                 [facebookFriendsQuery whereKey:kPAPUserFacebookIDKey containedIn:facebookIds];
                 
                 // auto-follow Parse employees
-                PFQuery *autoFollowAccountsQuery = [PFUser query];
-                [autoFollowAccountsQuery whereKey:kPAPUserFacebookIDKey containedIn:kPAPAutoFollowAccountFacebookIds];
+                PFQuery *parseEmployeesQuery = [PFUser query];
+                [parseEmployeesQuery whereKey:kPAPUserFacebookIDKey containedIn:kPAPParseEmployeeAccounts];
                 
                 // combined query
-                PFQuery *query = [PFQuery orQueryWithSubqueries:[NSArray arrayWithObjects:autoFollowAccountsQuery,facebookFriendsQuery, nil]];
+                PFQuery *query = [PFQuery orQueryWithSubqueries:[NSArray arrayWithObjects:parseEmployeesQuery,facebookFriendsQuery, nil]];
                 
                 NSArray *anypicFriends = [query findObjects:&error];
                 

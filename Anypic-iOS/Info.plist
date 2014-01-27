@@ -30,7 +30,7 @@
 		</dict>
 	</dict>
 	<key>CFBundleIdentifier</key>
-	<string>${BUNDLE_IDENTIFIER}com.parse.Anypic</string>
+	<string>${BUNDLE_IDENTIFIER}</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -38,7 +38,7 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.4</string>
+	<string>${BUILD_VERSION}</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleURLTypes</key>
@@ -50,14 +50,34 @@
 			<string>Icon@2x</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>fbFACEBOOK_APP_ID</string>
+				<string>fb231265150320768</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLIconFile</key>
+			<string>Icon@2x</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>anypic</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLIconFile</key>
+			<string>Icon@2x</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>parsephoto</string>
 			</array>
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>1.4</string>
+	<string>${APP_VERSION}</string>
 	<key>FacebookAppID</key>
-	<string>FACEBOOK_APP_ID</string>
+	<string>YOUR_FACEBOOK_APP_ID</string>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.photography</string>
 	<key>LSRequiresIPhoneOS</key>

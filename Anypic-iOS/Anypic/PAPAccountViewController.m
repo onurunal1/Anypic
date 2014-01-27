@@ -3,12 +3,14 @@
 //  Anypic
 //
 //  Created by Héctor Ramos on 5/2/12.
+//  Copyright (c) 2013 Parse. All rights reserved.
 //
 
 #import "PAPAccountViewController.h"
 #import "PAPPhotoCell.h"
 #import "TTTTimeIntervalFormatter.h"
 #import "PAPLoadMoreCell.h"
+#import "UIImage+ImageEffects.h"
 
 @interface PAPAccountViewController()
 @property (nonatomic, strong) UIView *headerView;
@@ -30,17 +32,6 @@
     }
 
     self.navigationItem.titleView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"LogoNavigationBar.png"]];
-
-    UIButton *backButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    [backButton setFrame:CGRectMake( 0.0f, 0.0f, 52.0f, 32.0f)];
-    [backButton setTitle:@"Back" forState:UIControlStateNormal];
-    [backButton setTitleColor:[UIColor colorWithRed:214.0f/255.0f green:210.0f/255.0f blue:197.0f/255.0f alpha:1.0] forState:UIControlStateNormal];
-    [[backButton titleLabel] setFont:[UIFont boldSystemFontOfSize:[UIFont smallSystemFontSize]]];
-    [backButton setTitleEdgeInsets:UIEdgeInsetsMake( 0.0f, 5.0f, 0.0f, 0.0f)];
-    [backButton addTarget:self action:@selector(backButtonAction:) forControlEvents:UIControlEventTouchUpInside];
-    [backButton setBackgroundImage:[UIImage imageNamed:@"ButtonBack.png"] forState:UIControlStateNormal];
-    [backButton setBackgroundImage:[UIImage imageNamed:@"ButtonBackSelected.png"] forState:UIControlStateHighlighted];
-    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:backButton];
     
     self.headerView = [[UIView alloc] initWithFrame:CGRectMake( 0.0f, 0.0f, self.tableView.bounds.size.width, 222.0f)];
     [self.headerView setBackgroundColor:[UIColor clearColor]]; // should be clear, this will be the container for our avatar, photo count, follower count, following count, and so on
@@ -75,10 +66,19 @@
         [profilePictureImageView setFile:imageFile];
         [profilePictureImageView loadInBackground:^(UIImage *image, NSError *error) {
             if (!error) {
-                [UIView animateWithDuration:0.200f animations:^{
+                [UIView animateWithDuration:0.2f animations:^{
                     profilePictureBackgroundView.alpha = 1.0f;
                     profilePictureStrokeImageView.alpha = 1.0f;
                     profilePictureImageView.alpha = 1.0f;
+                }];
+                
+                UIImageView *backgroundImageView = [[UIImageView alloc] initWithImage:[image applyLightEffect]];
+                backgroundImageView.frame = self.tableView.backgroundView.bounds;
+                backgroundImageView.alpha = 0.0f;
+                [self.tableView.backgroundView addSubview:backgroundImageView];
+                
+                [UIView animateWithDuration:0.2f animations:^{
+                    backgroundImageView.alpha = 1.0f;
                 }];
             }
         }];
@@ -90,7 +90,7 @@
     [self.headerView addSubview:photoCountIconImageView];
     
     UILabel *photoCountLabel = [[UILabel alloc] initWithFrame:CGRectMake( 0.0f, 94.0f, 92.0f, 22.0f)];
-    [photoCountLabel setTextAlignment:UITextAlignmentCenter];
+    [photoCountLabel setTextAlignment:NSTextAlignmentCenter];
     [photoCountLabel setBackgroundColor:[UIColor clearColor]];
     [photoCountLabel setTextColor:[UIColor whiteColor]];
     [photoCountLabel setShadowColor:[UIColor colorWithWhite:0.0f alpha:0.300f]];
@@ -104,7 +104,7 @@
     [self.headerView addSubview:followersIconImageView];
     
     UILabel *followerCountLabel = [[UILabel alloc] initWithFrame:CGRectMake( 226.0f, 94.0f, self.headerView.bounds.size.width - 226.0f, 16.0f)];
-    [followerCountLabel setTextAlignment:UITextAlignmentCenter];
+    [followerCountLabel setTextAlignment:NSTextAlignmentCenter];
     [followerCountLabel setBackgroundColor:[UIColor clearColor]];
     [followerCountLabel setTextColor:[UIColor whiteColor]];
     [followerCountLabel setShadowColor:[UIColor colorWithWhite:0.0f alpha:0.300f]];
@@ -113,7 +113,7 @@
     [self.headerView addSubview:followerCountLabel];
     
     UILabel *followingCountLabel = [[UILabel alloc] initWithFrame:CGRectMake( 226.0f, 110.0f, self.headerView.bounds.size.width - 226.0f, 16.0f)];
-    [followingCountLabel setTextAlignment:UITextAlignmentCenter];
+    [followingCountLabel setTextAlignment:NSTextAlignmentCenter];
     [followingCountLabel setBackgroundColor:[UIColor clearColor]];
     [followingCountLabel setTextColor:[UIColor whiteColor]];
     [followingCountLabel setShadowColor:[UIColor colorWithWhite:0.0f alpha:0.300f]];
@@ -122,7 +122,7 @@
     [self.headerView addSubview:followingCountLabel];
     
     UILabel *userDisplayNameLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 176.0f, self.headerView.bounds.size.width, 22.0f)];
-    [userDisplayNameLabel setTextAlignment:UITextAlignmentCenter];
+    [userDisplayNameLabel setTextAlignment:NSTextAlignmentCenter];
     [userDisplayNameLabel setBackgroundColor:[UIColor clearColor]];
     [userDisplayNameLabel setTextColor:[UIColor whiteColor]];
     [userDisplayNameLabel setShadowColor:[UIColor colorWithWhite:0.0f alpha:0.300f]];
@@ -158,7 +158,7 @@
     NSDictionary *followingDictionary = [[PFUser currentUser] objectForKey:@"following"];
     [followingCountLabel setText:@"0 following"];
     if (followingDictionary) {
-        [followingCountLabel setText:[NSString stringWithFormat:@"%d following", [[followingDictionary allValues] count]]];
+        [followingCountLabel setText:[NSString stringWithFormat:@"%lu following", (unsigned long)[[followingDictionary allValues] count]]];
     }
     
     PFQuery *queryFollowingCount = [PFQuery queryWithClassName:kPAPActivityClassKey];
